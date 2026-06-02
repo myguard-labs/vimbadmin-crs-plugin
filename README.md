@@ -90,4 +90,4 @@ go-ftw test cases under [`tests/regression/`](tests/regression/) and
 
 - ViMbAdmin fork: <https://github.com/eilandert/ViMbAdmin>
 - Hardened FPM pool, Angie vhost and the Snuffleupagus ruleset ship in that
-  repo under `contrib/` and `snuffleupagus/`.
+  repo under `contrib/`.
