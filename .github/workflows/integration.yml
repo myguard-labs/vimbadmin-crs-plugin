@@ -103,4 +103,13 @@ jobs:
   plugin-integration:
     needs: validate-structure
     # Official OWASP CRS plugin integration test (pinned SHA for v3.0.0).
+    # crs-config is appended to the engine's CRS setup (phase-1), so it scopes
+    # the plugin to the go-ftw test host (ci.local) and enables the opt-in
+    # positive-security layer — exactly what tests/regression/ asserts against.
+    # Without it the deny rules (9529220/9529230) stay off and the host gate
+    # skips the exclusions, so the regression suite cannot pass on defaults.
     uses: coreruleset/crs-plugin-test-action/.github/workflows/integration.yaml@738f25b8d5ee671dcc8ba76aa29365ffd690309a
+    with:
+      crs-config: |
+        SecAction "id:9519990,phase:1,nolog,pass,t:none,setvar:tx.vimbadmin_host=ci.local"
+        SecAction "id:9519991,phase:1,nolog,pass,t:none,setvar:tx.vimbadmin-plugin_positive_security=1"
