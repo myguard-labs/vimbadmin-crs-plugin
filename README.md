@@ -4,7 +4,7 @@
 
 # ViMbAdmin OWASP CRS Plugin
 
-![Lint](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration tests](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache + ModSecurity v2](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![nginx + libmodsecurity3](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg) ![WAF security corpus](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/security-corpus.yml/badge.svg)
+![Lint](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration tests](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache + ModSecurity v2](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![nginx + libmodsecurity3](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg)
 
 A drop-in [OWASP CRS](https://coreruleset.org/) plugin that makes the Core
 Rule Set play nicely with **[ViMbAdmin](https://github.com/eilandert/ViMbAdmin)**
@@ -36,6 +36,11 @@ It does two things:
    outside ViMbAdmin's real route map is denied. This stops parameter
    smuggling, mass-assignment probing and the usual `/​.env` / `/wp-login.php`
    scanner noise regardless of payload.
+
+## Requirements
+
+- CRS Version 4.0 or newer
+- ModSecurity compatible Web Application Firewall
 
 ## Install
 
@@ -74,7 +79,7 @@ Rule ID range: **9,529,000 – 9,529,999** (CRS-allocated block base 9,529,000).
 
 ## Continuous integration
 
-Every push/PR runs five GitHub Actions workflows (each gets its own badge above):
+Every push/PR runs four GitHub Actions workflows (each gets its own badge above):
 
 | Workflow | What it does |
 |---|---|
@@ -82,11 +87,24 @@ Every push/PR runs five GitHub Actions workflows (each gets its own badge above)
 | **Integration tests** | Plugin-structure gates (host gate present, opt-in allowlist, conditional config defaults, `ver:` on every rule) + the official CRS integration action. |
 | **Apache + ModSecurity v2** | Builds a shared CRS+plugin image and runs the go-ftw regression suite on real Apache httpd + mod_security2 (`apache2ctl -t` gates parse). |
 | **nginx + libmodsecurity3** | Same shared image on Angie + libmodsecurity3 3.0.14 — a production mirror (`angie -t` gates parse). |
-| **WAF security corpus** | Cross-engine adversarial corpus: probes that must be blocked + legitimate traffic that must not be, on both engines. |
 
 The dual-engine harness lives under [`tests/integration/`](tests/integration/);
 go-ftw test cases under [`tests/regression/`](tests/regression/) and
 [`tests/security/`](tests/security/).
+
+## Disabling the plugin
+
+Uncomment rule `9529010` inside `plugins/vimbadmin-config.conf`, or remove the
+plugin files from the `plugins/` directory entirely.
+
+## Reporting false positives
+
+Open a new issue or pull request. For issues, include:
+
+- CRS Version
+- ModSecurity/Coraza Version
+- modsec audit logs
+- what caused the false positive
 
 ## See also
 
