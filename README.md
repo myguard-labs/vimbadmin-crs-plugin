@@ -1,3 +1,5 @@
+> 🔗 **ViMbAdmin:** [github.com/eilandert/vimbadmin](https://github.com/eilandert/vimbadmin)
+>
 > 📖 **Read the write-up:** [ViMbAdmin — a Postfix/Dovecot mailbox admin panel](https://deb.myguard.nl/2026/06/vimbadmin-postfix-dovecot-mailbox-admin-panel/)
 
 # ViMbAdmin OWASP CRS Plugin
