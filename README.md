@@ -1,3 +1,5 @@
+> 📖 **Read the write-up:** [ViMbAdmin — a Postfix/Dovecot mailbox admin panel](https://deb.myguard.nl/2026/06/vimbadmin-postfix-dovecot-mailbox-admin-panel/)
+
 # ViMbAdmin OWASP CRS Plugin
 
 ![Lint](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration tests](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache + ModSecurity v2](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![nginx + libmodsecurity3](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg) ![WAF security corpus](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/security-corpus.yml/badge.svg)
