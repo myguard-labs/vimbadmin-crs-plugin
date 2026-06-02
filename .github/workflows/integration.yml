@@ -28,13 +28,15 @@ jobs:
 
       - name: Verify host gate present in both before/after
         run: |
-          # Every exclusion + every deny must be gated on tx.vimbadmin-plugin_host
+          # Every exclusion + every deny must be gated on tx.vimbadmin_host
           # so the plugin never touches other vhosts behind the same CRS.
-          echo "Checking host gate (tx.vimbadmin-plugin_host)..."
+          # (The var is underscore-named, not "vimbadmin-plugin_host": a
+          # ModSecurity macro-expanded @rx mishandles hyphenated TX names.)
+          echo "Checking host gate (tx.vimbadmin_host)..."
           FAILED=0
           for f in plugins/vimbadmin-before.conf plugins/vimbadmin-after.conf; do
-            if ! grep -q 'vimbadmin-plugin_host' "$f"; then
-              echo "ERROR: $f does not reference the host gate tx.vimbadmin-plugin_host"
+            if ! grep -q 'vimbadmin_host' "$f"; then
+              echo "ERROR: $f does not reference the host gate tx.vimbadmin_host"
               FAILED=1
             fi
           done
