@@ -4,6 +4,19 @@ A drop-in [OWASP CRS](https://coreruleset.org/) plugin that makes the Core
 Rule Set play nicely with **[ViMbAdmin](https://github.com/eilandert/ViMbAdmin)**
 — and, optionally, locks the admin panel down to a strict allowlist.
 
+> **Do you need this?** Probably not on its own. ViMbAdmin's request surface
+> is small and fully known, so the **positive-security Angie/nginx vhost**
+> shipped in the main repo (`contrib/angie/vimbadmin.conf`) already does the
+> route/method/argument allowlisting at the edge, natively, with no
+> ModSecurity dependency and no per-request CRS cost. That vhost is the
+> recommended primary defence.
+>
+> This CRS plugin is **belt-and-braces**: run it *in addition* only if you
+> already operate libmodsecurity + CRS and want signature scanning of the
+> argument **values** the app accepts (SQLi/XSS payload heuristics) on top of
+> the vhost's name/route allowlisting. If you don't already run ModSecurity,
+> the vhost alone is the right answer.
+
 It does two things:
 
 1. **False-positive exclusions** (`vimbadmin-before.conf`) — surgical,
