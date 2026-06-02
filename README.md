@@ -1,5 +1,7 @@
 # ViMbAdmin OWASP CRS Plugin
 
+![Lint](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration tests](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache + ModSecurity v2](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![nginx + libmodsecurity3](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg) ![WAF security corpus](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/security-corpus.yml/badge.svg)
+
 A drop-in [OWASP CRS](https://coreruleset.org/) plugin that makes the Core
 Rule Set play nicely with **[ViMbAdmin](https://github.com/eilandert/ViMbAdmin)**
 — and, optionally, locks the admin panel down to a strict allowlist.
@@ -51,20 +53,36 @@ Edit `vimbadmin-config.conf`:
 | Variable | Default | Meaning |
 |---|---|---|
 | `tx.vimbadmin-plugin_enabled` | `1` | Master on/off. |
-| `tx.vimbadmin_host` | `^vimbadmin\.example\.com$` | **Set this** to your ViMbAdmin hostname(s) (anchored regex). All rules are scoped to it so other vhosts are untouched. |
-| `tx.vimbadmin_positive_security` | `0` | Turn the allowlist layer on (`1`) once you've tested it. |
+| `tx.vimbadmin_host` | `^vimbadmin.example.com$` | **Set this** to your ViMbAdmin hostname(s) (anchored regex; the `.` is a bare wildcard — ModSecurity macro-expanded `@rx` does not round-trip `\.`/`[.]`). All rules are scoped to it so other vhosts are untouched. |
+| `tx.vimbadmin-plugin_positive_security` | `0` | Turn the allowlist layer on (`1`) once you've tested it. |
 
 ## Roll-out
 
 1. Install + set `tx.vimbadmin_host`. The exclusions are safe immediately.
-2. Run CRS in **DetectionOnly** with `tx.vimbadmin_positive_security=1` and
-   watch the audit log for `9508220` / `9508230` hits — those are arguments
-   or paths missing from the allowlist. Add any legitimate ones you've added
-   via custom plugins to the `tx.vimbadmin_allow_args` regex in
-   `vimbadmin-after.conf`.
+2. Run CRS in **DetectionOnly** with `tx.vimbadmin-plugin_positive_security=1`
+   and watch the audit log for `9529220` / `9529230` hits — those are
+   arguments or paths missing from the allowlist. Add any legitimate ones
+   you've added via custom plugins to the inline allowlist regex on rule
+   `9529220` in `vimbadmin-after.conf`.
 3. Flip CRS back to blocking mode.
 
-Rule ID range: **9,508,000 – 9,508,999**.
+Rule ID range: **9,529,000 – 9,529,999** (CRS-allocated block base 9,529,000).
+
+## Continuous integration
+
+Every push/PR runs five GitHub Actions workflows (each gets its own badge above):
+
+| Workflow | What it does |
+|---|---|
+| **Lint** | Local rule-ID-range (9529000–9529999) / duplicate-ID / `@pmFromFile` / test-reference checks, then the official `coreruleset/crs-plugin-test-action` lint. |
+| **Integration tests** | Plugin-structure gates (host gate present, opt-in allowlist, conditional config defaults, `ver:` on every rule) + the official CRS integration action. |
+| **Apache + ModSecurity v2** | Builds a shared CRS+plugin image and runs the go-ftw regression suite on real Apache httpd + mod_security2 (`apache2ctl -t` gates parse). |
+| **nginx + libmodsecurity3** | Same shared image on Angie + libmodsecurity3 3.0.14 — a production mirror (`angie -t` gates parse). |
+| **WAF security corpus** | Cross-engine adversarial corpus: probes that must be blocked + legitimate traffic that must not be, on both engines. |
+
+The dual-engine harness lives under [`tests/integration/`](tests/integration/);
+go-ftw test cases under [`tests/regression/`](tests/regression/) and
+[`tests/security/`](tests/security/).
 
 ## See also
 

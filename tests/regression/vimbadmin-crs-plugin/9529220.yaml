@@ -1,0 +1,38 @@
+---
+meta:
+  author: "eilander"
+  description: "ViMbAdmin positive-security: disallowed parameter name is denied"
+rule_id: 9529220
+tests:
+  - test_id: 1
+    desc: "An unknown argument name on the ViMbAdmin host trips the allowlist deny"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: POST
+          uri: /domain/add
+          data: "evil_unexpected_param=1"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 2
+    desc: "A known ViMbAdmin argument name passes the allowlist"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: POST
+          uri: /domain/add
+          data: "domain=example.com&description=a+test+domain&max_quota=10GB"
+        output:
+          log:
+            no_expect_ids: [9529220]

@@ -1,0 +1,104 @@
+---
+on: [push, pull_request]          # yamllint disable-line rule:truthy
+name: Integration tests
+
+permissions:
+  contents: read
+
+jobs:
+  validate-structure:
+    name: Validate Plugin Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify plugin disable switch + ruleRemoveById range
+        run: |
+          # The CRS convention: the master off-switch lives at <base>+099 and
+          # disables the rule block via ctl:ruleRemoveById. Verify it exists
+          # and that the disabled range stays inside 9529100-9529199.
+          echo "Checking master disable rule 9529099..."
+          if grep -q 'id:9529099' plugins/vimbadmin-before.conf && \
+             grep -q 'ctl:ruleRemoveById=9529100-9529199' plugins/vimbadmin-before.conf; then
+            echo "✓ 9529099 disables the 9529100-9529199 block"
+          else
+            echo "ERROR: master disable rule 9529099 missing or wrong range"
+            exit 1
+          fi
+
+      - name: Verify host gate present in both before/after
+        run: |
+          # Every exclusion + every deny must be gated on tx.vimbadmin-plugin_host
+          # so the plugin never touches other vhosts behind the same CRS.
+          echo "Checking host gate (tx.vimbadmin-plugin_host)..."
+          FAILED=0
+          for f in plugins/vimbadmin-before.conf plugins/vimbadmin-after.conf; do
+            if ! grep -q 'vimbadmin-plugin_host' "$f"; then
+              echo "ERROR: $f does not reference the host gate tx.vimbadmin-plugin_host"
+              FAILED=1
+            fi
+          done
+          [ "$FAILED" -eq 0 ] && echo "✓ Host gate present in before + after"
+          [ "$FAILED" -eq 0 ] || exit 1
+
+      - name: Verify positive-security layer is opt-in
+        run: |
+          # The allowlist deny rules must be skipped unless
+          # tx.vimbadmin-plugin_positive_security == 1, so a default install
+          # never blocks. Rule 9529200 enforces this.
+          echo "Checking opt-in gate for the positive-security layer..."
+          if grep -q 'id:9529200' plugins/vimbadmin-after.conf && \
+             grep -q 'vimbadmin-plugin_positive_security' plugins/vimbadmin-after.conf && \
+             grep -q 'ctl:ruleRemoveById=9529201-9529399' plugins/vimbadmin-after.conf; then
+            echo "✓ Positive-security layer is opt-in (gated by 9529200)"
+          else
+            echo "ERROR: positive-security opt-in gate (9529200) missing or wrong"
+            exit 1
+          fi
+
+      - name: Verify config seeds default vars conditionally
+        run: |
+          # The config rules must only seed each tx var if it has not been set
+          # before (&TX:var @eq 0), per CRS convention, so a global override wins.
+          echo "Checking conditional defaults in vimbadmin-config.conf..."
+          FAILED=0
+          for id in 9529010 9529011 9529012; do
+            if ! grep -q "id:$id" plugins/vimbadmin-config.conf; then
+              echo "ERROR: config rule $id missing"
+              FAILED=1
+            fi
+          done
+          grep -q '&TX:vimbadmin-plugin_enabled "@eq 0"' plugins/vimbadmin-config.conf || \
+            { echo "ERROR: enabled var not seeded conditionally"; FAILED=1; }
+          [ "$FAILED" -eq 0 ] && echo "✓ Config seeds defaults conditionally"
+          [ "$FAILED" -eq 0 ] || exit 1
+
+      - name: "Verify ver: tag on every rule"
+        run: |
+          # CRS plugin convention: each rule carries a ver: tag matching the
+          # plugin version. Flag any SecRule/SecAction id: without a ver:.
+          echo "Checking every rule carries a ver: tag..."
+          MISSING=0
+          # Collapse line-continuations, then check each rule block.
+          awk 'BEGIN{RS=""} /id:[0-9]/{ if ($0 !~ /ver:/) { print "rule block missing ver:"; bad=1 } } END{ exit bad?1:0 }' \
+            <(sed -e ':a' -e '/\\$/N; s/\\\n//; ta' plugins/*.conf) || MISSING=1
+          [ "$MISSING" -eq 0 ] && echo "✓ All rules carry a ver: tag"
+          [ "$MISSING" -eq 0 ] || exit 1
+
+      - name: Verify expected rules present
+        run: |
+          echo "Validating rule presence..."
+          for ruleid in 9529010 9529011 9529012 \
+                        9529099 9529100 9529101 9529102 9529103 9529104 9529105 9529106 \
+                        9529200 9529201 9529220 9529230; do
+            if ! grep "id:$ruleid" plugins/*.conf > /dev/null; then
+              echo "ERROR: Rule ID $ruleid not found"
+              exit 1
+            fi
+          done
+          echo "✓ All expected rules present"
+
+  plugin-integration:
+    needs: validate-structure
+    # Official OWASP CRS plugin integration test (pinned SHA for v3.0.0).
+    uses: coreruleset/crs-plugin-test-action/.github/workflows/integration.yaml@738f25b8d5ee671dcc8ba76aa29365ffd690309a

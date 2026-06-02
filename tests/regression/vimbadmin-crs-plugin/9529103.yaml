@@ -1,0 +1,23 @@
+---
+meta:
+  author: "eilander"
+  description: "Alias exclusion: comma-separated goto list does not trip CRS"
+rule_id: 9529103
+tests:
+  - test_id: 1
+    desc: "A multi-address goto list with @ , and dots is excluded on /alias/add"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+            Content-Type: application/x-www-form-urlencoded
+          port: 80
+          method: POST
+          uri: /alias/add
+          data: "address=team%40example.com&goto=a%40example.com%2Cb%40example.com%2Cc%40example.com"
+        output:
+          log:
+            no_expect_ids: [942100, 941100, 942190, 941160]

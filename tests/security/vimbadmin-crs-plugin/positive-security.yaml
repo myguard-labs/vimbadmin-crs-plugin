@@ -1,0 +1,83 @@
+---
+meta:
+  author: "eilander"
+  description: "Positive-security corpus: probes that MUST be blocked by the allowlist"
+rule_id: 9529000
+tests:
+  - test_id: 1
+    desc: "evasion-param-smuggle: unknown parameter name must be denied (9529220)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: POST
+          uri: /domain/add
+          data: "domain=example.com&__proto__=polluted"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 2
+    desc: "evasion-massassign: mass-assignment probe param must be denied (9529220)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: POST
+          uri: /mailbox/add
+          data: "local_part=user&is_admin=1"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 3
+    desc: "evasion-route-dotenv: /.env probe must be denied by route map (9529230)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /.env
+        output:
+          log:
+            expect_ids: [9529230]
+  - test_id: 4
+    desc: "evasion-route-vendor: /vendor probe must be denied by route map (9529230)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /vendor/phpunit/phpunit/src/Util/PHP/eval-stdin.php
+        output:
+          log:
+            expect_ids: [9529230]
+  - test_id: 5
+    desc: "evasion-route-uppercase: case variation must still be route-denied (9529230)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /PhpMyAdmin/index.php
+        output:
+          log:
+            expect_ids: [9529230]

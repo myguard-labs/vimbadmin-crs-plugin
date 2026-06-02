@@ -1,0 +1,25 @@
+---
+meta:
+  author: "eilander"
+  description: "Login exclusion: symbol-laden password + CSRF token do not trip CRS"
+rule_id: 9529101
+tests:
+  - test_id: 1
+    desc: "A password full of SQLi/XSS-looking symbols is excluded on /auth/login"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+            Content-Type: application/x-www-form-urlencoded
+          port: 80
+          method: POST
+          uri: /auth/login
+          data: "username=admin&password=%27%20OR%201%3D1--%20%3Cscript%3E&csrf=a1b2c3d4e5f6a7b8c9d0"
+        output:
+          log:
+            # The excluded ARGS:password/csrf must not trigger the SQLi/XSS
+            # core rules. (PL1 SQLi 942100 / XSS 941100 families.)
+            no_expect_ids: [942100, 941100, 942190, 941160]

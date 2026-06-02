@@ -1,0 +1,51 @@
+---
+meta:
+  author: "eilander"
+  description: "ViMbAdmin positive-security: request outside known route map is denied"
+rule_id: 9529230
+tests:
+  - test_id: 1
+    desc: "A scanner probe path (/wp-login.php) is denied by the route allowlist"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /wp-login.php
+        output:
+          log:
+            expect_ids: [9529230]
+  - test_id: 2
+    desc: "A real ViMbAdmin controller route passes the route allowlist"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /mailbox/list
+        output:
+          log:
+            no_expect_ids: [9529230]
+  - test_id: 3
+    desc: "A static asset passes the route allowlist"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /css/admin.css
+        output:
+          log:
+            no_expect_ids: [9529230]

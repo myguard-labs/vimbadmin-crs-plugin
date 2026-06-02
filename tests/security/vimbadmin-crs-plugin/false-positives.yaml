@@ -1,0 +1,87 @@
+---
+meta:
+  author: "eilander"
+  description: "False-positive corpus: legitimate ViMbAdmin traffic that MUST NOT be blocked"
+rule_id: 9529001
+tests:
+  - test_id: 1
+    desc: "fp-login-symbol-password: login with a symbol-heavy password is allowed"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+            Content-Type: application/x-www-form-urlencoded
+          port: 80
+          method: POST
+          uri: /auth/login
+          data: "username=admin&password=P%40ss%27w0rd%21%3C%3E%26&csrf=deadbeefcafef00ddeadbeefcafef00d"
+        output:
+          log:
+            no_expect_ids: [9529220, 9529230, 942100, 941100]
+  - test_id: 2
+    desc: "fp-alias-goto-list: comma-separated goto list is allowed"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+            Content-Type: application/x-www-form-urlencoded
+          port: 80
+          method: POST
+          uri: /alias/add
+          data: "address=team%40example.com&goto=a%40example.com%2Cb%40example.com"
+        output:
+          log:
+            no_expect_ids: [9529220, 9529230, 942100, 941100]
+  - test_id: 3
+    desc: "fp-domain-freetext: free-text description + unit quota is allowed"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+            Content-Type: application/x-www-form-urlencoded
+          port: 80
+          method: POST
+          uri: /domain/edit
+          data: "domain=example.com&description=Marketing+%26+Sales+%2D+EU+region&max_quota=10GB&quota=512MB"
+        output:
+          log:
+            no_expect_ids: [9529220, 9529230, 942100, 941100]
+  - test_id: 4
+    desc: "fp-typeahead-query: additional-info typeahead query is allowed"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/additionalinfo/typeahead?query=john.doe"
+        output:
+          log:
+            no_expect_ids: [9529220, 9529230, 942100, 941100]
+  - test_id: 5
+    desc: "fp-static-asset: a CSS asset is not route-denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /js/vimbadmin.js
+        output:
+          log:
+            no_expect_ids: [9529220, 9529230]
