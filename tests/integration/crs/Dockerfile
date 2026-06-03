@@ -44,7 +44,7 @@ RUN mkdir -p /opt/crs/plugins \
 COPY plugins/ /opt/crs/plugins/
 
 # Engine config + the include chain (DetectionOnly, serial audit log, the
-# go-ftw log marker, host gate + positive-security enabled — see the files).
+# go-ftw log marker, plugin + positive-security enabled — see the files).
 COPY tests/integration/crs/modsecurity.conf /opt/crs/modsecurity.conf
 COPY tests/integration/crs/crs-main.conf /opt/crs/crs-main.conf
 
