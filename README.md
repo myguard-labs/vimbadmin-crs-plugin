@@ -61,13 +61,31 @@ Edit `vimbadmin-config.conf`:
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `tx.vimbadmin-plugin_enabled` | `1` | Master on/off. |
-| `tx.vimbadmin_host` | `^vimbadmin.example.com$` | **Set this** to your ViMbAdmin hostname(s) (anchored regex; the `.` is a bare wildcard — ModSecurity macro-expanded `@rx` does not round-trip `\.`/`[.]`). All rules are scoped to it so other vhosts are untouched. |
+| `tx.vimbadmin-plugin_enabled` | `0` | Master on/off. **OFF by default** — the plugin weakens CRS on the ViMbAdmin routes, so it must be enabled per vhost, not globally. Set to `1` only in the ViMbAdmin server/location block (see Roll-out). |
 | `tx.vimbadmin-plugin_positive_security` | `0` | Turn the allowlist layer on (`1`) once you've tested it. |
+
+Scoping is done entirely by the per-vhost enable flag — there is **no Host
+gate**. Enable the plugin only where ViMbAdmin is served, e.g. (Angie /
+nginx + libmodsecurity3):
+
+```nginx
+location /vimbadmin/ {
+    modsecurity on;
+    modsecurity_rules '
+        SecAction "id:9529001,phase:1,nolog,pass,setvar:tx.vimbadmin-plugin_enabled=1"
+    ';
+    # ...
+}
+```
+
+On Apache/mod_security2, set the same variable inside the matching
+`<Location>` / `<VirtualHost>` block.
 
 ## Roll-out
 
-1. Install + set `tx.vimbadmin_host`. The exclusions are safe immediately.
+1. Install, then enable the plugin in the ViMbAdmin vhost/location only
+   (`setvar:tx.vimbadmin-plugin_enabled=1`). The exclusions are safe
+   immediately and never touch other vhosts on the same CRS engine.
 2. Run CRS in **DetectionOnly** with `tx.vimbadmin-plugin_positive_security=1`
    and watch the audit log for `9529220` / `9529230` hits — those are
    arguments or paths missing from the allowlist. Add any legitimate ones
