@@ -93,7 +93,9 @@ On Apache/mod_security2, set the same variable inside the matching
    `9529220` in `vimbadmin-after.conf`.
 3. Flip CRS back to blocking mode.
 
-Rule ID range: **9,529,000 – 9,529,999** (CRS-allocated block base 9,529,000).
+Rule ID range: **9,529,000 – 9,529,999** (block base 9,529,000; free in the
+[CRS plugin registry](https://github.com/coreruleset/plugin-registry),
+pending formal assignment).
 
 ## Continuous integration
 
@@ -102,7 +104,7 @@ Every push/PR runs four GitHub Actions workflows (each gets its own badge above)
 | Workflow | What it does |
 |---|---|
 | **Lint** | Local rule-ID-range (9529000–9529999) / duplicate-ID / `@pmFromFile` / test-reference checks, then the official `coreruleset/crs-plugin-test-action` lint. |
-| **Integration tests** | Plugin-structure gates (host gate present, opt-in allowlist, conditional config defaults, `ver:` on every rule) + the official CRS integration action. |
+| **Integration tests** | Plugin-structure gates (no host gate — scoping is the per-vhost enable flag, opt-in allowlist, conditional config defaults, `ver:` on every rule). |
 | **Apache + ModSecurity v2** | Builds a shared CRS+plugin image and runs the go-ftw regression suite on real Apache httpd + mod_security2 (`apache2ctl -t` gates parse). |
 | **nginx + libmodsecurity3** | Same shared image on Angie + libmodsecurity3 3.0.14 — a production mirror (`angie -t` gates parse). |
 
