@@ -34,6 +34,21 @@ tests:
         output:
           log:
             no_expect_ids: [9529230]
+  - test_id: 4
+    desc: "The maintenance update-check sub-action route passes (regression: was a 404)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: POST
+          uri: /maintenance/check-update
+        output:
+          log:
+            no_expect_ids: [9529230]
   - test_id: 3
     desc: "A static asset passes the route allowlist"
     stages:

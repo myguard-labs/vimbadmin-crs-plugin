@@ -36,3 +36,19 @@ tests:
         output:
           log:
             no_expect_ids: [9529220]
+  - test_id: 3
+    desc: "The maintenance update-check 'which' param is allowlisted (regression: was a 404)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: POST
+          uri: /maintenance/check-update
+          data: "which=release&csrf=deadbeefcafef00ddeadbeefcafef00d"
+        output:
+          log:
+            no_expect_ids: [9529220]
