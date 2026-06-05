@@ -85,3 +85,19 @@ tests:
         output:
           log:
             no_expect_ids: [9529220, 9529230]
+  - test_id: 6
+    desc: "fp-datatables-prefs-cookie: vm_prefs JSON cookie must not trip SQLi (942340)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+            Cookie: 'vm_prefs={"iLength":"100"}'
+          port: 80
+          method: GET
+          uri: /maintenance
+        output:
+          log:
+            no_expect_ids: [942340, 942100, 942190]
