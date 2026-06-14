@@ -131,3 +131,7 @@ Open a new issue or pull request. For issues, include:
 - ViMbAdmin fork: <https://github.com/eilandert/ViMbAdmin>
 - Hardened FPM pool, Angie vhost and the Snuffleupagus ruleset ship in that
   repo under `contrib/`.
+- WAF engine deep-dive: [Coraza WAF on NGINX — the Go-powered ModSecurity
+  replacement](https://deb.myguard.nl/2026/06/coraza-waf-nginx-modsecurity-replacement/).
+  What Coraza and libcoraza are, and how the CRS (and this plugin) run on the
+  Go engine.
