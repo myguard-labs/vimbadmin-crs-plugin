@@ -52,3 +52,18 @@ tests:
         output:
           log:
             no_expect_ids: [9529220]
+  - test_id: 4
+    desc: "DataTables server-side processing arg names pass (regression: list views 403'd, broke the Ajax tables)"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/mailbox/list-data?sEcho=2&iColumns=6&sColumns=,,,,,&iDisplayStart=0&iDisplayLength=25&mDataProp_0=0&mDataProp_5=5&sSearch=&bRegex=false&sSearch_0=&bRegex_0=false&bSearchable_0=true&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc&bSortable_5=false&_=1700000000"
+        output:
+          log:
+            no_expect_ids: [9529220]
