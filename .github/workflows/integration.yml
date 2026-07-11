@@ -1,6 +1,6 @@
 ---
 on: [push, pull_request]          # yamllint disable-line rule:truthy
-name: Integration tests
+name: Integration Tests
 
 permissions:
   contents: read
@@ -126,7 +126,7 @@ jobs:
 # shared CRS image, enable the plugin + the
 # positive-security layer (tests/integration/crs/crs-main.conf), then run the
 # full go-ftw regression + security corpus on real engines:
-#   - .github/workflows/apache-modsecurity2.yml   (Apache + ModSecurity v2)
-#   - .github/workflows/nginx-libmodsecurity3.yml (Angie + libmodsecurity3)
+#   - .github/workflows/apache-modsecurity2.yml   (Apache/v2)
+#   - .github/workflows/nginx-libmodsecurity3.yml (NGINX/v3)
 # Plus the official plugin lint (.github/workflows/lint.yml). The structure
 # gates above stay as the integration smoke test.

@@ -42,8 +42,8 @@ docker compose -f tests/integration/docker-compose.yml down -t 0
 
 CI runs each backend as its own workflow (so each gets its own badge):
 
-- `.github/workflows/apache-modsecurity2.yml` — **Apache + ModSecurity v2**
-- `.github/workflows/nginx-libmodsecurity3.yml` — **nginx + libmodsecurity3**
+- `.github/workflows/apache-modsecurity2.yml` — **Apache/v2**
+- `.github/workflows/nginx-libmodsecurity3.yml` — **NGINX/v3**
 
 Both build the same shared `vimbadmin-crs` image, so they validate
 byte-identical rules on the two engines.

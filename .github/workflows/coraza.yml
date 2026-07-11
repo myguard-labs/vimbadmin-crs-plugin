@@ -7,14 +7,14 @@
 #
 # Security note: no untrusted event input is interpolated anywhere.
 on: [pull_request]                # yamllint disable-line rule:truthy
-name: Coraza compatibility
+name: Coraza
 
 permissions:
   contents: read
 
 jobs:
   coraza-gate:
-    name: Coraza v3 load gate
+    name: Coraza
     runs-on: [self-hosted, builder02, lxc]
     timeout-minutes: 15
     steps:

@@ -4,7 +4,7 @@
 
 # ViMbAdmin OWASP CRS Plugin
 
-![Lint](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration tests](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache + ModSecurity v2](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![nginx + libmodsecurity3](https://github.com/eilandert/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg) ![Coraza compatibility](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/coraza.yml/badge.svg?event=pull_request)
+![Lint](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration Tests](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache/v2](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![NGINX/v3](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg) ![Coraza](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/coraza.yml/badge.svg?event=pull_request)
 
 A drop-in [OWASP CRS](https://coreruleset.org/) plugin that makes the Core
 Rule Set play nicely with **[ViMbAdmin](https://github.com/eilandert/ViMbAdmin)**
@@ -66,7 +66,7 @@ Edit `vimbadmin-config.conf`:
 
 Scoping is done entirely by the per-vhost enable flag — there is **no Host
 gate**. Enable the plugin only where ViMbAdmin is served, e.g. (Angie /
-nginx + libmodsecurity3):
+NGINX/Angie + libmodsecurity3):
 
 ```nginx
 location /vimbadmin/ {
@@ -104,10 +104,10 @@ Every push/PR runs five GitHub Actions workflows (each gets its own badge above)
 | Workflow | What it does |
 |---|---|
 | **Lint** | Local rule-ID-range (9529000–9529999) / duplicate-ID / `@pmFromFile` / test-reference checks, then the official `coreruleset/crs-plugin-test-action` lint. |
-| **Integration tests** | Plugin-structure gates (no host gate — scoping is the per-vhost enable flag, opt-in allowlist, conditional config defaults, `ver:` on every rule). |
-| **Apache + ModSecurity v2** | Builds a shared CRS+plugin image and runs the go-ftw regression suite on real Apache httpd + mod_security2 (`apache2ctl -t` gates parse). |
-| **nginx + libmodsecurity3** | Same shared image on Angie + libmodsecurity3 3.0.14 — a production mirror (`angie -t` gates parse). |
-| **Coraza compatibility** | Loads every plugin file into `coraza.NewWAF()` (vendored probe in [`tests/coraza/`](tests/coraza/)) — Coraza fails hard at config load where ModSecurity warns, so this gates the third engine. Runs on PRs. |
+| **Integration Tests** | Plugin-structure gates (no host gate — scoping is the per-vhost enable flag, opt-in allowlist, conditional config defaults, `ver:` on every rule). |
+| **Apache/v2** | Builds a shared CRS+plugin image and runs the go-ftw regression suite on real Apache httpd + mod_security2 (`apache2ctl -t` gates parse). |
+| **NGINX/v3** | Same shared image on Angie + libmodsecurity3 3.0.14 — a production mirror (`angie -t` gates parse). |
+| **Coraza** | Loads every plugin file into `coraza.NewWAF()` (vendored probe in [`tests/coraza/`](tests/coraza/)) — Coraza fails hard at config load where ModSecurity warns, so this gates the third engine. Runs on PRs. |
 
 The dual-engine harness lives under [`tests/integration/`](tests/integration/);
 go-ftw test cases under [`tests/regression/`](tests/regression/) and
