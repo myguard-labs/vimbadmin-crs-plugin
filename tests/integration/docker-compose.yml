@@ -1,14 +1,15 @@
-# Both backends, one shared CRS image.
+# Three backends, one shared CRS image.
 #
 #   crs    – builds the shared CRS + plugin tree (no long-running service;
-#            apache & nginx COPY --from it via build arg).
-#   apache – Apache httpd + ModSecurity v2  (port 8001)
-#   nginx  – Angie + libmodsecurity3 v3      (port 8002)
+#            each engine image COPYs it via build arg).
+#   apache       – Apache httpd + ModSecurity v2  (port 8001)
+#   nginx        – Angie + libmodsecurity3 v3      (port 8002)
+#   nginx-coraza – nginx + Coraza connector        (port 8003)
 #
 # Build context is the repo root so the images can COPY plugins/ and
 # tests/integration/. Run from the repo root:
 #   docker compose -f tests/integration/docker-compose.yml build
-#   docker compose -f tests/integration/docker-compose.yml up -d apache nginx
+#   docker compose -f tests/integration/docker-compose.yml up -d apache nginx nginx-coraza
 #
 # Audit logs are exposed on the host under tests/logs/<backend>/audit.log
 # for go-ftw.
@@ -47,3 +48,16 @@ services:
       - "8002:80"
     volumes:
       - ../logs/nginx:/var/log/modsec
+
+  nginx-coraza:
+    image: vimbadmin-nginx-coraza:latest
+    build:
+      context: ../..
+      dockerfile: tests/integration/nginx-coraza/Dockerfile
+      args:
+        CRS_IMAGE: vimbadmin-crs:latest
+    depends_on: [crs]
+    ports:
+      - "8003:80"
+    volumes:
+      - ../logs/coraza:/var/log/modsec

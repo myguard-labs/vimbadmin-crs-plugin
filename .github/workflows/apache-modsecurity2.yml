@@ -1,8 +1,8 @@
 ---
 # Apache httpd + ModSecurity v2 (libapache2-mod-security2).
 # Builds the SHARED CRS+plugin image (tests/integration/crs) and runs the
-# go-ftw regression suite against it. `apache2ctl -t` runs at image build
-# time: an invalid rule fails the build.
+# common go-ftw regression + security suites against it. `apache2ctl -t`
+# runs at image build time: an invalid rule fails the build.
 #
 # Security note: the only ${{ }} in a run: context is github.token; no
 # untrusted event input is interpolated anywhere.
@@ -38,7 +38,7 @@ jobs:
       - name: Start Apache
         run: |
           docker compose -f tests/integration/docker-compose.yml up -d apache
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if curl -fsS -o /dev/null "http://127.0.0.1:8001/"; then
               echo "apache up"; exit 0
             fi
@@ -48,31 +48,16 @@ jobs:
           docker compose -f tests/integration/docker-compose.yml logs apache
           exit 1
 
-      - name: Install go-ftw (retry on flaky tar/network)
+      - name: Install go-ftw
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          for attempt in 1 2 3; do
-            rm -f ftw.tgz ftw
-            if gh release download -R coreruleset/go-ftw \
-                -p 'ftw_*_linux_amd64.tar.gz' -O ftw.tgz "${GO_FTW_VERSION}" \
-                && tar -xzf ftw.tgz ftw; then
-              break
-            fi
-            echo "ftw download attempt ${attempt} failed; retrying"
-            sleep 5
-          done
-          chmod +x ftw
-          test -x ftw
+        run: tests/integration/install-ftw.sh
 
       - name: Use committed go-ftw config (apache @ :8001)
-        run: cat tests/integration/.ftw.yml
+        run: tests/integration/write-ftw-config.sh apache 8001
 
-      - name: Run plugin regression suite
-        run: |
-          ./ftw check -d tests/regression --config tests/integration/.ftw.yml
-          ./ftw run   -d tests/regression --config tests/integration/.ftw.yml \
-            --show-failures-only
+      - name: Run common FTW suites
+        run: tests/integration/run-ftw-suite.sh
 
       - name: Dump logs on failure
         if: failure()
