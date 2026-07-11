@@ -4,7 +4,10 @@
 # go-ftw regression + security suites against the real connector.
 #
 # Security note: no untrusted event input is interpolated anywhere.
-on: [push, pull_request]          # yamllint disable-line rule:truthy
+on:
+  push:
+    branches: [master]
+  pull_request:
 name: NGINX/Coraza
 
 concurrency:
