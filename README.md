@@ -6,6 +6,8 @@
 
 ![Lint](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration Tests](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache/v2](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![NGINX/v3](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg) ![NGINX/Coraza](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/coraza.yml/badge.svg) ![Security Corpus](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/security-corpus.yml/badge.svg)
 
+![Defense-in-depth: the vimbadmin-crs-plugin hardens the WAF edge with an Angie vhost route/ARGS allowlist and CRS signature scanning before requests reach the ViMbAdmin mailbox admin panel, Postfix and Dovecot](https://deb.myguard.nl/wp-content/uploads/2026/07/vimbadmin-crs-plugin-defense-in-depth.webp)
+
 A drop-in [OWASP CRS](https://coreruleset.org/) plugin that makes the Core
 Rule Set play nicely with **[ViMbAdmin](https://github.com/eilandert/ViMbAdmin)**
 — and, optionally, locks the admin panel down to a strict allowlist.
