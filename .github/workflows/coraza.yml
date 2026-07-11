@@ -1,0 +1,79 @@
+---
+# nginx + Coraza. Builds the same shared CRS+plugin image as Apache/v2 and
+# NGINX/v3, loads it through libnginx-mod-http-coraza, and runs the common
+# go-ftw regression + security suites against the real connector.
+#
+# Security note: no untrusted event input is interpolated anywhere.
+on:
+  push:
+    branches: [master]
+  pull_request:
+name: NGINX/Coraza
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # renovate: datasource=github-releases depName=coreruleset/go-ftw
+  GO_FTW_VERSION: "v2.1.0"
+
+jobs:
+  nginx-coraza:
+    name: NGINX/Coraza
+    runs-on: [self-hosted, builder02, docker]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Build shared CRS image
+        run: docker compose -f tests/integration/docker-compose.yml build crs
+
+      - name: Build NGINX/Coraza image (nginx -t gate)
+        run: docker compose -f tests/integration/docker-compose.yml build nginx-coraza
+
+      - name: Prepare log file
+        run: |
+          mkdir -p tests/logs/coraza
+          : > tests/logs/coraza/audit.log
+          chmod -R 777 tests/logs
+
+      - name: Start NGINX/Coraza
+        run: |
+          docker compose -f tests/integration/docker-compose.yml up -d nginx-coraza
+          for _ in $(seq 1 30); do
+            if curl -fsS -o /dev/null "http://127.0.0.1:8003/"; then
+              echo "nginx-coraza up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "nginx-coraza did not become ready"
+          docker compose -f tests/integration/docker-compose.yml logs nginx-coraza
+          exit 1
+
+      - name: Install go-ftw
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: tests/integration/install-ftw.sh
+
+      - name: Generate go-ftw config (nginx-coraza @ :8003)
+        run: tests/integration/write-ftw-config.sh coraza 8003
+
+      - name: Run common FTW suites
+        run: tests/integration/run-ftw-suite.sh
+
+      - name: Dump logs on failure
+        if: failure()
+        run: |
+          echo "=== container logs ==="
+          docker compose -f tests/integration/docker-compose.yml logs nginx-coraza || true
+          echo "=== coraza audit log ==="
+          tail -n 200 tests/logs/coraza/audit.log || true
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f tests/integration/docker-compose.yml down -t 0 || true

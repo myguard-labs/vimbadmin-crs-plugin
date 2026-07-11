@@ -1,6 +1,13 @@
 ---
-on: [push, pull_request]          # yamllint disable-line rule:truthy
-name: Integration tests
+on:
+  push:
+    branches: [master]
+  pull_request:
+name: Integration Tests
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -10,7 +17,9 @@ jobs:
     name: Validate Plugin Structure
     runs-on: [self-hosted, builder02, docker]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Verify plugin disable switch + ruleRemoveById range
         run: |
@@ -126,7 +135,7 @@ jobs:
 # shared CRS image, enable the plugin + the
 # positive-security layer (tests/integration/crs/crs-main.conf), then run the
 # full go-ftw regression + security corpus on real engines:
-#   - .github/workflows/apache-modsecurity2.yml   (Apache + ModSecurity v2)
-#   - .github/workflows/nginx-libmodsecurity3.yml (Angie + libmodsecurity3)
+#   - .github/workflows/apache-modsecurity2.yml   (Apache/v2)
+#   - .github/workflows/nginx-libmodsecurity3.yml (NGINX/v3)
 # Plus the official plugin lint (.github/workflows/lint.yml). The structure
 # gates above stay as the integration smoke test.
