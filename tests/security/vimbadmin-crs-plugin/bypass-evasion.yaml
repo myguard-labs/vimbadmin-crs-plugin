@@ -1,0 +1,141 @@
+---
+meta:
+  author: "eilander"
+  description: "Evasion corpus: attacks that MUST still be denied when obfuscated
+    (case, path dot-segments, double-slash, URL-encoding). A failure here means
+    a positive-security deny (9529220 arg-name allowlist / 9529230 route
+    allowlist) is bypassable — it directly guards the t:lowercase / t:normalizePath
+    transform chain on those two rules."
+  enabled: true
+  name: bypass-evasion.yaml
+# Assertions live per-test in output.log.expect_ids. This top-level rule_id is
+# FTW reporting metadata only (the plugin's allocated base id).
+rule_id: 9529000
+tests:
+  # ── 9529230 route allowlist (t:lowercase,t:normalizePath) ────────────────
+  - test_id: 1
+    desc: "evasion-route-case: uppercased probe path still denied by route map"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /WP-LOGIN.PHP
+        output:
+          log:
+            expect_ids: [9529230]
+  - test_id: 2
+    desc: "evasion-route-dot-segment: /./ and // must normalise, probe still denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /a/.//../vendor/phpunit
+        output:
+          log:
+            expect_ids: [9529230]
+  - test_id: 3
+    desc: "evasion-route-mixedcase-env: /.Env probe still denied after lowercase"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /.Env
+        output:
+          log:
+            expect_ids: [9529230]
+  - test_id: 4
+    desc: "evasion-route-double-slash: //phpmyadmin// must normalise, still denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: //phpmyadmin//index.php
+        output:
+          log:
+            expect_ids: [9529230]
+  # ── 9529220 arg-name allowlist (t:lowercase) ─────────────────────────────
+  - test_id: 5
+    desc: "evasion-arg-case: uppercased unknown arg name still denied after lowercase"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+            Content-Type: application/x-www-form-urlencoded
+          port: 80
+          method: POST
+          uri: /domain/add
+          data: "EVIL_UNEXPECTED=1"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 6
+    desc: "evasion-arg-mixedcase-proto: __PROTO__ mass-assign probe still denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+            Content-Type: application/x-www-form-urlencoded
+          port: 80
+          method: POST
+          uri: /mailbox/add
+          data: "local_part=user&__PROTO__=polluted"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 7
+    desc: "evasion-arg-in-querystring: unknown arg via GET query still denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /domain/list?evilarg=1
+        output:
+          log:
+            expect_ids: [9529220]
+  # ── negative: legit obfuscation-shaped traffic must NOT be denied ─────────
+  - test_id: 8
+    desc: "fp-legit-mixedcase-controller: real controller in mixed case still allowed"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: /Domain/List
+        output:
+          log:
+            no_expect_ids: [9529230]
