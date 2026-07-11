@@ -4,7 +4,7 @@
 
 # ViMbAdmin OWASP CRS Plugin
 
-![Lint](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration Tests](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache/v2](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![NGINX/v3](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg) ![NGINX/Coraza](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/coraza.yml/badge.svg)
+![Lint](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/lint.yml/badge.svg) ![Integration Tests](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/integration.yml/badge.svg) ![Apache/v2](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/apache-modsecurity2.yml/badge.svg) ![NGINX/v3](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/nginx-libmodsecurity3.yml/badge.svg) ![NGINX/Coraza](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/coraza.yml/badge.svg) ![Security Corpus](https://github.com/myguard-labs/vimbadmin-crs-plugin/actions/workflows/security-corpus.yml/badge.svg)
 
 A drop-in [OWASP CRS](https://coreruleset.org/) plugin that makes the Core
 Rule Set play nicely with **[ViMbAdmin](https://github.com/eilandert/ViMbAdmin)**
@@ -99,7 +99,7 @@ pending formal assignment).
 
 ## Continuous integration
 
-Every push/PR runs five GitHub Actions workflows (each gets its own badge above):
+Every push/PR runs six GitHub Actions workflows (each gets its own badge above):
 
 | Workflow | What it does |
 |---|---|
@@ -108,6 +108,7 @@ Every push/PR runs five GitHub Actions workflows (each gets its own badge above)
 | **Apache/v2** | Builds the shared CRS+plugin image and runs the common go-ftw regression + security suites on real Apache httpd + mod_security2 (`apache2ctl -t` gates parse). |
 | **NGINX/v3** | Same shared image and same suites on Angie + libmodsecurity3 3.0.14 — a production mirror (`angie -t` gates parse). |
 | **NGINX/Coraza** | Same shared image and same suites on nginx + `libnginx-mod-http-coraza` / `libcoraza1` (`nginx -t` gates parse). |
+| **Security Corpus** | Runs the adversarial evasion + positive-security payloads under [`tests/security/`](tests/security/) on Apache + mod_security2 as a focused, deterministic bypass/over-block gate. |
 
 The three-engine harness lives under [`tests/integration/`](tests/integration/);
 all engine workflows run the go-ftw cases under
