@@ -55,3 +55,58 @@ tests:
         output:
           log:
             no_expect_ids: [9529220]
+  - test_id: 4
+    desc: "A complete DataTables 2 server-side request passes the allowlist"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/domain/list-data?draw=7&start=20&length=25\
+            &search%5Bvalue%5D=%2Aabc&search%5Bregex%5D=false\
+            &order%5B0%5D%5Bcolumn%5D=2&order%5B0%5D%5Bdir%5D=desc\
+            &order%5B0%5D%5Bname%5D=domain\
+            &columns%5B0%5D%5Bdata%5D=id\
+            &columns%5B0%5D%5Bname%5D=domain\
+            &columns%5B0%5D%5Bsearchable%5D=true\
+            &columns%5B0%5D%5Borderable%5D=true\
+            &columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=\
+            &columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false"
+        output:
+          log:
+            no_expect_ids: [9529220]
+  - test_id: 5
+    desc: "An unknown nested DataTables search member is denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/domain/list-data?draw=1&search%5Bscript%5D=x"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 6
+    desc: "Legacy-only DataTables parameter names are denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/domain/list-data?sEcho=1&iDisplayStart=0\
+            &iDisplayLength=10&sSearch=abc&iSortCol_0=0&sSortDir_0=asc"
+        output:
+          log:
+            expect_ids: [9529220]
