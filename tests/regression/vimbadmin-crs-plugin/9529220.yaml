@@ -110,3 +110,67 @@ tests:
         output:
           log:
             expect_ids: [9529220]
+  - test_id: 7
+    desc: "An unknown nested DataTables order member is denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/domain/list-data?draw=1&order%5B0%5D%5Bscript%5D=x"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 8
+    desc: "An unknown nested DataTables column member is denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/domain/list-data?draw=1&columns%5B0%5D%5Bscript%5D=x"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 9
+    desc: "An unknown nested DataTables column search member is denied"
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/domain/list-data?draw=1\
+            &columns%5B0%5D%5Bsearch%5D%5Bscript%5D=x"
+        output:
+          log:
+            expect_ids: [9529220]
+  - test_id: 10
+    desc: >-
+      Multi-digit DataTables order and column indices pass the allowlist
+    stages:
+      - input:
+          dest_addr: 127.0.0.1
+          headers:
+            Host: ci.local
+            User-Agent: OWASP CRS
+            Accept: "*/*"
+          port: 80
+          method: GET
+          uri: "/domain/list-data?draw=1&order%5B10%5D%5Bcolumn%5D=10\
+            &columns%5B10%5D%5Bdata%5D=id\
+            &columns%5B10%5D%5Bsearch%5D%5Bvalue%5D="
+        output:
+          log:
+            no_expect_ids: [9529220]
